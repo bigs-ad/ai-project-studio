@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "phases": [
+    {
+      "id": "discovery",
+      "title": "Discovery",
+      "goal": "Confirm the project outcome, user, success measures, constraints, and non-goals.",
+      "next": ["validation"],
+      "gates": [
+        {"id": "outcome", "label": "The intended outcome is confirmed."},
+        {"id": "target-user", "label": "The target user or audience is confirmed."},
+        {"id": "success-measures", "label": "Observable success measures are confirmed."},
+        {"id": "constraints", "label": "Important time, cost, platform, and technical constraints are recorded."},
+        {"id": "non-goals", "label": "Explicit non-goals are confirmed."}
+      ]
+    },
+    {
+      "id": "validation",
+      "title": "Validation",
+      "goal": "Test the riskiest assumption with the smallest credible artifact.",
+      "next": ["build"],
+      "gates": [
+        {"id": "riskiest-assumption", "label": "The riskiest assumption is explicit."},
+        {"id": "validation-evidence", "label": "Inspectable validation evidence is recorded."},
+        {"id": "mvp-scope", "label": "The smallest build scope and its non-goals are approved."}
+      ]
+    },
+    {
+      "id": "build",
+      "title": "Build",
+      "goal": "Deliver approved vertical slices and verify their outcomes.",
+      "next": ["release"],
+      "gates": [
+        {"id": "milestone-complete", "label": "The approved milestone work is complete."},
+        {"id": "tests", "label": "Relevant automated or manual checks pass."},
+        {"id": "acceptance-evidence", "label": "Acceptance evidence matches the approved outcome."}
+      ]
+    },
+    {
+      "id": "release",
+      "title": "Release",
+      "goal": "Prepare a reversible, observable release and obtain approval.",
+      "next": ["operate"],
+      "gates": [
+        {"id": "release-candidate", "label": "A releasable artifact is identified."},
+        {"id": "rollback", "label": "Rollback or recovery is documented and credible."},
+        {"id": "release-approval", "label": "The user explicitly approves release."}
+      ]
+    },
+    {
+      "id": "operate",
+      "title": "Operate",
+      "goal": "Observe real use and choose the next outcome from evidence.",
+      "next": ["build"],
+      "gates": [
+        {"id": "feedback-evidence", "label": "Real usage or feedback evidence is summarized."},
+        {"id": "next-hypothesis", "label": "The next outcome or hypothesis is approved."}
+      ]
+    }
+  ]
+}

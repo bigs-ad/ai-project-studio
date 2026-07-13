@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "id": "game",
+  "display_name": "Game",
+  "template_directory": "game",
+  "required_files": ["GAME_DESIGN.md", "PLAYTEST.md"],
+  "phase_gates": {
+    "discovery": [
+      {"id": "game-promise", "label": "The game promise and target player are confirmed."},
+      {"id": "core-loop", "label": "The core player loop and session shape are explicit."}
+    ],
+    "validation": [
+      {"id": "playable-loop", "label": "A minimal playable loop exists."},
+      {"id": "playtest", "label": "Playtest observations from intended players are recorded."}
+    ],
+    "build": [
+      {"id": "vertical-slice", "label": "One representative vertical slice is complete."},
+      {"id": "performance-budget", "label": "The slice meets its platform performance budget."}
+    ],
+    "release": [
+      {"id": "distributable-build", "label": "The release candidate installs or launches on its target platform."}
+    ],
+    "operate": [
+      {"id": "player-learning", "label": "Observed player behavior is separated from interpretation."}
+    ]
+  }
+}

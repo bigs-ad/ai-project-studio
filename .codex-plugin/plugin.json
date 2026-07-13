@@ -1,0 +1,25 @@
+{
+  "name": "ai-project-studio",
+  "version": "0.3.0+codex.20260713064808",
+  "description": "Guide durable game and web projects through discovery, recoverable context, deliverable contracts, user approvals, implementation, and verification.",
+  "author": {
+    "name": "bigs-ad"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AI Project Studio",
+    "shortDescription": "Plan and advance game and web projects safely.",
+    "longDescription": "A producer-led workflow that keeps project state in the repository, exposes current-stage blind spots, declares deliverable fidelity, and protects important decisions with approval and evidence gates.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "\u4f7f\u7528 $manage-project-studio \u542f\u52a8\u5f53\u524d\u9879\u76ee\u3002\u5148\u53ea\u8fdb\u5165 Discovery\uff0c\u4e0d\u5b9e\u73b0\u3001\u4e0d\u59d4\u6d3e\uff1b\u533a\u5206\u4e8b\u5b9e\u3001\u5047\u8bbe\u548c\u672a\u77e5\uff0c\u6307\u51fa\u6700\u5927\u98ce\u9669\uff0c\u53ea\u95ee\u4e00\u4e2a\u5173\u952e\u95ee\u9898\u3002",
+      "\u4f7f\u7528 $manage-project-studio \u6062\u590d\u5f53\u524d\u9879\u76ee\u4e0a\u4e0b\u6587\uff0c\u5e76\u544a\u8bc9\u6211\u552f\u4e00\u63a8\u8350\u7684\u4e0b\u4e00\u6b65\u3002",
+      "\u4f7f\u7528 $manage-project-studio \u6839\u636e\u4ea4\u4ed8\u7269\u5951\u7ea6\u548c\u8bc1\u636e\u9a8c\u6536\u5f53\u524d\u5de5\u4f5c\u9879\u3002"
+    ]
+  }
+}

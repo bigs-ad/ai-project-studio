@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Project Studio"
+  short_description: "Run recoverable producer-led game and web projects"
+  default_prompt: "Use $manage-project-studio to start in Discovery. Do not implement or delegate yet; separate facts, assumptions, and unknowns, identify the biggest risk, and ask one key question."

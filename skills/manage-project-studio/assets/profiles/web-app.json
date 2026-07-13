@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "id": "web-app",
+  "display_name": "Web Application",
+  "template_directory": "web-app",
+  "required_files": ["PRODUCT.md", "USER_FLOWS.md", "RELEASE_CHECKLIST.md"],
+  "phase_gates": {
+    "discovery": [
+      {"id": "problem", "label": "The real user problem and primary journey are confirmed."}
+    ],
+    "validation": [
+      {"id": "end-to-end-slice", "label": "A prototype or thin end-to-end journey exists."},
+      {"id": "error-states", "label": "Critical empty, error, permission, and recovery states are defined."}
+    ],
+    "build": [
+      {"id": "data-permissions", "label": "Data ownership and permission boundaries are verified."},
+      {"id": "automated-tests", "label": "Critical user journeys have automated regression coverage."}
+    ],
+    "release": [
+      {"id": "security-accessibility", "label": "Security, privacy, and accessibility checks pass."},
+      {"id": "deployment-observability", "label": "Deployment health and failures are observable."}
+    ],
+    "operate": [
+      {"id": "production-learning", "label": "Production behavior and user feedback are summarized."}
+    ]
+  }
+}
