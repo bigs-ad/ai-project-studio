@@ -1,70 +1,72 @@
 # AI Project Studio
 
-AI Project Studio is a producer-led Codex plugin for advancing game and web application projects without relying on chat history as project memory.
+**简体中文** | [English](README.en.md)
 
-It keeps project truth in the repository, limits implementation to approved work, declares deliverable fidelity, and restores context across new Codex tasks and temporary subagents.
+AI Project Studio 是一个由制作人工作流驱动的 Codex 插件，用于持续推进游戏和 Web 应用项目，而不把聊天记录当作项目记忆。
 
-## What it provides
+它将项目事实保存在代码仓库中，只允许执行已经批准的工作，明确标注交付物完成度，并能在新的 Codex 任务和临时子代理之间恢复项目上下文。
 
-- Discovery, validation, build, release, and operate phases
-- Game and web application profiles
-- Project-local goals, decisions, roadmap, backlog, and playtest or product files
-- Bounded work items with approval-bound specifications
-- Explicit deliverable levels from placeholder through final in-context output
-- Compact recovery briefs and pause checkpoints
-- User-owned approval and final acceptance records
-- Deterministic validation and lifecycle commands
+## 提供的能力
 
-The workflow intentionally avoids permanent fictional teams, exhaustive checklists, and automatic process expansion.
+- 探索、验证、构建、发布和运营阶段
+- 游戏与 Web 应用项目配置
+- 保存在项目内的目标、决策、路线图、待办事项，以及试玩或产品记录
+- 有明确边界且需要批准规格的工作项
+- 从占位内容到最终实装效果的交付物等级
+- 精简的上下文恢复摘要和暂停检查点
+- 由用户掌控的批准和最终验收记录
+- 可重复验证的状态检查与项目生命周期命令
 
-## Requirements
+这套工作流刻意避免虚构常驻团队、穷举式检查清单，以及自动膨胀的流程。
 
-- Codex with plugin support
-- Python 3.10 or newer
+## 环境要求
 
-## Install for local use
+- 支持插件的 Codex
+- Python 3.10 或更高版本
 
-Clone the repository into your personal plugin source directory:
+## 本地安装
+
+将仓库克隆到个人插件源码目录：
 
 ```bash
 git clone https://github.com/bigs-ad/ai-project-studio.git ~/plugins/ai-project-studio
 ```
 
-Then ask Codex to add the local `ai-project-studio` directory to your personal marketplace and install it. The installed plugin should expose the `$manage-project-studio` skill.
+然后让 Codex 把本地 `ai-project-studio` 目录加入个人插件市场并安装。安装完成后，应当可以使用 `$ai-project-studio:manage-project-studio` skill。
 
-## Start a project
+## 启动项目
 
-Open Codex in a game or web application repository and use a short project brief:
-
-```text
-Use $manage-project-studio to start this game project.
-
-Project name: [name]
-Project owner: [owner label]
-Initial idea: [rough idea]
-```
-
-The first response stays in Discovery: no implementation or delegation, a separation of facts from assumptions and unknowns, one largest current risk, one recommended next step, and one important question.
-
-## Recover context
-
-At the start of a later task, ask:
+在一个游戏或 Web 应用代码仓库中打开 Codex，并提供一份简短的项目说明：
 
 ```text
-Use $manage-project-studio to recover this project and recommend the single next step.
+使用 $ai-project-studio:manage-project-studio 启动这个游戏项目。
+
+项目名称：[名称]
+项目负责人：[负责人标识]
+初始想法：[粗略想法]
 ```
 
-The skill validates project state, generates a compact brief, and reads only the files needed for the current decision.
+第一次响应会停留在探索阶段：不实现、不委派；区分事实、假设和未知项；指出当前最大的一个风险、推荐的唯一下一步，并提出一个最重要的问题。
 
-## CLI
+## 恢复上下文
 
-The deterministic state manager lives at:
+开始后续任务时，可以这样要求：
+
+```text
+使用 $ai-project-studio:manage-project-studio 恢复这个项目，并推荐唯一的下一步。
+```
+
+该 skill 会验证项目状态、生成精简摘要，并且只读取当前决策所需的文件。
+
+## 命令行工具
+
+确定性的状态管理工具位于：
 
 ```text
 skills/manage-project-studio/scripts/studio.py
 ```
 
-Examples:
+使用示例：
 
 ```bash
 python3 skills/manage-project-studio/scripts/studio.py profiles
@@ -72,11 +74,11 @@ python3 skills/manage-project-studio/scripts/studio.py validate /path/to/project
 python3 skills/manage-project-studio/scripts/studio.py brief /path/to/project
 ```
 
-Run `--help` for lifecycle, gate, work-item, repair, owner, and checkpoint commands.
+运行 `--help` 可以查看生命周期、门禁、工作项、修复、负责人和检查点相关命令。
 
-## Development
+## 开发
 
-Run the regression suite:
+运行回归测试：
 
 ```bash
 python3 -m unittest discover \
@@ -84,11 +86,10 @@ python3 -m unittest discover \
   -v
 ```
 
-## Scope
+## 适用范围
 
-The current profiles support games and web applications. Other project types are intentionally not treated as equivalent without a dedicated profile.
+当前配置支持游戏和 Web 应用。其他项目类型需要专门的项目配置，不会被默认视为同类项目处理。
 
-## License
+## 许可证
 
 [MIT](LICENSE)
-
