@@ -79,9 +79,9 @@ Use roles as review perspectives, not as fictional persistent employees:
 - QA: acceptance evidence, regressions, edge cases, and release readiness.
 - Mentor: explain reasoning when the user needs to learn, without taking over the decision.
 
-Delegate bounded implementation or independent review when it materially improves quality, but keep a single producer-owned recommendation. Subagents are temporary executors, not persistent employees. Delegate only after the work item is approved or in progress. Give each subagent the project root and work item id; require it to run `validate` and `brief --item <id>`, read the listed spec and profile, stay inside scope, and return inspectable evidence. The producer reviews the result and performs all state transitions.
+Default to direct producer execution for localized, reversible, well-bounded work. Do not delegate merely to separate coordination from implementation. Delegate bounded implementation when it materially improves quality or parallel efficiency, but keep a single producer-owned recommendation. Use an independent reviewer only for security, permissions, payments, data integrity or migration, release, core architecture, broad cross-module risk, or another concrete reason that makes a second perspective valuable. Subagents are temporary executors, not persistent employees. Delegate only after the work item is approved or in progress. Give each subagent the project root and work item id; require it to run `validate` and `brief --item <id>`, read the listed spec and profile, stay inside scope, and return inspectable evidence. The producer performs the default final review and all state transitions.
 
-Before ending a turn with unfinished in-progress or review work, persist a concise checkpoint with completed progress, the exact next action, and blockers. Do this at pause or handoff boundaries, not after every small action:
+Before ending a turn with unfinished in-progress or review work, persist a concise checkpoint with completed progress, the exact next action, and blockers. Write it once at an actual pause or handoff boundary, not during uninterrupted execution, and do not create a checkpoint for completed work. Perform only the required lifecycle transitions and batch human-maintained project writeback at the outcome boundary:
 
     python3 scripts/studio.py work checkpoint <project-root> <item-id> --summary "..." --next "..." --blocker "..." --by "Codex"
 
@@ -127,12 +127,13 @@ Read references/project-files.md when initializing, repairing, or validating pro
 
 ## Finish Work
 
-1. Run relevant tests and validation.
-2. Move the work item to review with concrete evidence.
-3. Review against the approved spec, deliverable contract, and profile-specific quality gates. Diagnose dissatisfaction before reworking: direction, fidelity misunderstanding, missing acceptance standard, execution quality, or unsuitable technical approach.
-4. Move it to done only when the evidence supports acceptance.
-5. Update decisions or backlog only when project truth changed.
-6. Tell the user what changed, what was verified, and the single recommended next action.
+1. During implementation run the smallest checks that cover the changed behavior. Do not rerun an unchanged passing suite without a code or state change that could affect it.
+2. After a correction, rerun only the failed or affected checks. Before final review, run the full relevant suite once, or state why it cannot run. Do not run every available unit, integration, and end-to-end suite by default.
+3. Move the work item to review with concrete evidence.
+4. The producer performs the default final review against the approved spec, deliverable contract, and profile-specific quality gates. Use independent review only under the risk rule above. Diagnose dissatisfaction before reworking: direction, fidelity misunderstanding, missing acceptance standard, execution quality, or unsuitable technical approach.
+5. Move it to done only when the evidence supports acceptance.
+6. Update decisions or backlog only when project truth changed.
+7. Tell the user what changed, what was verified, and the single recommended next action.
 
 ## Keep The Method Small
 
