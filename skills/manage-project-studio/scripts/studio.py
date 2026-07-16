@@ -2248,8 +2248,8 @@ def command_work_attach_spec(args: argparse.Namespace) -> int:
     if item["status"] not in {"draft", "proposed"}:
         raise StudioError("A spec can only be attached to a draft or proposed work item")
     ignored = (
-        RECOVERABLE_SPEC_ERRORS + RECOVERABLE_STATUS_ERRORS
-        if item_spec_needs_repair(target, item)
+        RECOVERABLE_SPEC_ERRORS + RECOVERABLE_CONTRACT_ERRORS + RECOVERABLE_STATUS_ERRORS
+        if item_spec_needs_repair(target, item) or item_contract_needs_repair(target, item)
         else ()
     )
     require_valid_target(target, ignored)
