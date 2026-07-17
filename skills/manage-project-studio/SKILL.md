@@ -96,6 +96,8 @@ Every new work item must use the machine-readable contract in `studio/specs/WORK
 - inspectable acceptance evidence;
 - current unknowns exposed by a blind-spot scan.
 
+Before generating any visual, audio, animation, UI, or other project asset, give one concise preflight stating what will be generated and where it will be used; whether it is a candidate, reference or placeholder, or intended for direct in-product use, plus its fidelity; what the user should judge now; and the single next step if accepted. This explanation is not a new approval gate: proceed unless an existing approval boundary requires confirmation. Never leave the user to infer the asset stage or next action from the output alone.
+
 Fidelity is one of exploratory, placeholder, prototype, vertical-slice, production, or final-in-context. Never present placeholder or prototype work as final quality. A low-fidelity item may be completed when its limited purpose is accepted, but its `does_not_prove` and `remaining_steps` remain explicit. Use the CLI to enforce contract presence; do not bypass it with prose approval.
 
 ## Enforce Approval Boundaries
