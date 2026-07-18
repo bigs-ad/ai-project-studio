@@ -69,7 +69,7 @@ MANAGED_END = "<!-- ai-project-studio:end -->"
 AGENTS_BLOCK = f"""{MANAGED_START}
 ## AI Project Studio
 
-- 回答问题时只回答；项目判断或行动前运行 `$manage-project-studio` 的 `validate` 和 `brief`，项目事实以仓库为准。
+- 回答问题时只回答；项目判断或行动前先加载已安装的 `manage-project-studio` Skill，并使用该 Skill 的 `scripts/studio.py` 运行 `validate` 和 `brief`，项目事实以仓库为准。
 - 用户确认产品方向、目标用户、成功标准、审美、范围、成本和发布；AI 负责已批准范围内低风险、可逆的技术与执行决策，重要不明确点只问一个关键问题。
 - 只实现当前 Phase Run 中状态为 approved 或 in_progress 且规格哈希有效的工作项；Subagent 不得批准、推进阶段或修改 Studio 状态。
 - 收到负面反馈先诊断再同意或返工；验证成果后只推荐一个下一步，不因单次失败新增流程、文档、角色或检查表。
@@ -2445,7 +2445,7 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("--name", required=True)
     init.add_argument("--owner", default="User")
     init.add_argument("--idea")
-    init.add_argument("--initialized-by", default="Codex")
+    init.add_argument("--initialized-by", default="AI Producer")
     init.set_defaults(func=command_init)
 
     validate = commands.add_parser("validate", help="Validate Studio state")
@@ -2518,7 +2518,7 @@ def build_parser() -> argparse.ArgumentParser:
     work_add.add_argument("--kind", choices=["feature", "bug", "experiment", "chore"], required=True)
     work_add.add_argument("--summary", required=True)
     work_add.add_argument("--spec")
-    work_add.add_argument("--by", default="Codex")
+    work_add.add_argument("--by", default="AI Producer")
     work_add.set_defaults(func=command_work_add)
     work_spec = work_commands.add_parser("attach-spec")
     work_spec.add_argument("target")
@@ -2533,13 +2533,13 @@ def build_parser() -> argparse.ArgumentParser:
     work_checkpoint.add_argument("--summary", required=True)
     work_checkpoint.add_argument("--next", dest="next_action", required=True)
     work_checkpoint.add_argument("--blocker", action="append")
-    work_checkpoint.add_argument("--by", default="Codex")
+    work_checkpoint.add_argument("--by", default="AI Producer")
     work_checkpoint.set_defaults(func=command_work_checkpoint)
     work_move = work_commands.add_parser("move")
     work_move.add_argument("target")
     work_move.add_argument("item_id")
     work_move.add_argument("state", choices=sorted(VALID_WORK_STATES))
-    work_move.add_argument("--by", default="Codex")
+    work_move.add_argument("--by", default="AI Producer")
     work_move.add_argument("--approved-by")
     work_move.add_argument("--reason")
     work_move.add_argument("--evidence")

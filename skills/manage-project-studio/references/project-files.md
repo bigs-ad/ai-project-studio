@@ -43,7 +43,7 @@ Use `studio.py brief <project-root>` at the start of a new thread or after conte
 For unfinished work, `studio.py work checkpoint` stores only the latest progress summary, next action, blockers, author, and timestamp on the work item. Use it at pause and handoff boundaries; it is not an activity log:
 
 ```text
-python3 scripts/studio.py work checkpoint <project-root> <item-id> --summary "..." --next "..." --blocker "..." --by "Codex"
+python3 scripts/studio.py work checkpoint <project-root> <item-id> --summary "..." --next "..." --blocker "..." --by "AI Producer"
 ```
 
 Use `studio.py repair <project-root>` only to refresh the managed AGENTS.md block and generated STATUS.md after a plugin policy update. It refuses to hide unrelated state corruption.

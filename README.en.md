@@ -2,9 +2,9 @@
 
 [简体中文](README.md) | **English**
 
-AI Project Studio is a producer-led Codex plugin for advancing game and web application projects without relying on chat history as project memory.
+AI Project Studio is a producer-led AI development plugin for advancing game and web application projects in Codex and Kimi Work without relying on chat history as project memory.
 
-It keeps project truth in the repository, limits implementation to approved work, declares deliverable fidelity, and restores context across new Codex tasks and temporary subagents.
+It keeps project truth in the repository, limits implementation to approved work, declares deliverable fidelity, and restores context across new AI tasks and temporary subagents. Both hosts use the same `manage-project-studio` skill rather than separate forks.
 
 ## What it provides
 
@@ -21,22 +21,30 @@ The workflow intentionally avoids permanent fictional teams, exhaustive checklis
 
 ## Requirements
 
-- Codex with plugin support
+- Codex with plugin support, or Kimi Work
 - Python 3.10 or newer
 
 ## Install for local use
 
-Clone the repository into your personal plugin source directory:
+Clone the repository first:
 
 ```bash
 git clone https://github.com/bigs-ad/ai-project-studio.git ~/plugins/ai-project-studio
 ```
 
+### Codex
+
 Then ask Codex to add the local `ai-project-studio` directory to your personal marketplace and install it. The installed plugin should expose the `$ai-project-studio:manage-project-studio` skill.
+
+### Kimi Work
+
+In Kimi Work, open **Plugins → Skills** and click the folder button in the upper-right corner to open the local skills directory. Copy the repository's complete `skills/manage-project-studio` directory into it. Fully quit and restart Kimi Work; `manage-project-studio` should then appear under installed skills.
+
+Kimi Work reads this skill directly, so no second source copy or additional plugin manifest is required.
 
 ## Start a project
 
-Open Codex in a game or web application repository and use a short project brief:
+Open Codex or Kimi Work in a game or web application repository and provide a short project brief. In Codex, use the full plugin name:
 
 ```text
 Use $ai-project-studio:manage-project-studio to start this game project.
@@ -45,6 +53,8 @@ Project name: [name]
 Project owner: [owner label]
 Initial idea: [rough idea]
 ```
+
+In Kimi Work, select the installed `manage-project-studio` skill and use the same project brief.
 
 The first response stays in Discovery: no implementation or delegation, a separation of facts from assumptions and unknowns, one largest current risk, one recommended next step, and one important question.
 
