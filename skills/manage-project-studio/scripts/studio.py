@@ -69,14 +69,10 @@ MANAGED_END = "<!-- ai-project-studio:end -->"
 AGENTS_BLOCK = f"""{MANAGED_START}
 ## AI Project Studio
 
-- 回答问题时只回答，不因问题中出现可执行想法而自动修改项目。
-- 任何项目判断或变更前使用 `$manage-project-studio` 中的 `scripts/studio.py validate` 和 `brief`，再按 brief 指向渐进读取；项目事实以仓库为准，不依赖聊天或 Subagent 记忆。
-- AI 是制作人入口；用户确认产品方向、目标用户、成功标准、审美、范围、成本和发布，AI 自行决定已批准范围内低风险、可逆的实现细节。
-- 重要信息不明确时只问当前最关键的问题；发现用户误解时明确纠正；更优方案会改变已批准方向时先说明影响并等待确认。
-- 推荐工作前说明当前阶段、事实、未知、当前阶段盲区，以及交付物的完成度、用途、能证明和不能证明的内容。
-- 只实现当前 Phase Run 中状态为 approved 或 in_progress、且规格哈希仍有效的工作项；聊天中的批准不能替代持久状态。
-- Subagent 是临时专项执行者；委派时必须提供项目根目录和工作项 ID，并要求其使用该 Skill 运行 `validate`、`brief --item`、读取规格后再行动；制作人负责最终审查和 Studio 状态变更。
-- 一次问题不得触发新增流程、文档、角色或检查表；实现后先验证并提供证据，再更新状态和推荐唯一下一步。
+- 回答问题时只回答；项目判断或行动前运行 `$manage-project-studio` 的 `validate` 和 `brief`，项目事实以仓库为准。
+- 用户确认产品方向、目标用户、成功标准、审美、范围、成本和发布；AI 负责已批准范围内低风险、可逆的技术与执行决策，重要不明确点只问一个关键问题。
+- 只实现当前 Phase Run 中状态为 approved 或 in_progress 且规格哈希有效的工作项；Subagent 不得批准、推进阶段或修改 Studio 状态。
+- 收到负面反馈先诊断再同意或返工；验证成果后只推荐一个下一步，不因单次失败新增流程、文档、角色或检查表。
 {MANAGED_END}
 """
 
@@ -1568,7 +1564,7 @@ def build_brief_data(
         for item in work.get("items", [])
         if item.get("status") in active_states
     ]
-    required_reads = ["studio/STATUS.md", "studio/PROJECT.md"]
+    required_reads = ["studio/PROJECT.md"]
     focus_data: dict[str, Any] | None = None
     if focus:
         execution_allowed = focus.get("status") in {"approved", "in_progress"}

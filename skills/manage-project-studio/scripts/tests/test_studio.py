@@ -169,6 +169,11 @@ class StudioContractTests(unittest.TestCase):
         self.assertFalse(
             proposed_data["focus_item"]["subagent_state_changes_allowed"]
         )
+        self.assertIn("studio/PROJECT.md", proposed_data["required_reads"])
+        self.assertNotIn("studio/STATUS.md", proposed_data["required_reads"])
+        self.assertIn(
+            proposed_data["focus_item"]["spec"], proposed_data["required_reads"]
+        )
 
         self.move(first, "approved", "--approved-by", "Jiang")
         second = self.add_item("Second proposal")

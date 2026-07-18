@@ -24,11 +24,27 @@ Game adds GAME_DESIGN.md and PLAYTEST.md. Web-app adds PRODUCT.md, USER_FLOWS.md
 
 Keep facts, assumptions, unknowns, proposals, and approved decisions visibly distinct. Chat history is context, not project truth.
 
+## Initialization
+
+Choose `game` only for a playable interactive product whose primary success measure is player experience. Choose `web-app` for SaaS, dashboards, portals, internal tools, and transactional sites. Ask the user when the classification is materially ambiguous.
+
+Run:
+
+```text
+python3 scripts/studio.py init <project-root> --profile <game|web-app> --name "Project Name" --owner "User" --idea "User's initial description"
+```
+
+Initialization may add `studio/` and a managed block to `AGENTS.md`; it must preserve existing instructions, leave business code unchanged, and remain in Discovery. Run `validate` after initialization.
+
 The CLI stores a normalized deliverable-contract snapshot on new work items when they become proposed. It refuses approval when the spec omits or invalidates the contract. Legacy work items remain readable and are reported as warnings rather than silently rewritten.
 
 Use `studio.py brief <project-root>` at the start of a new thread or after context loss. It prints a compact recovery map from existing state without creating another project file. Use `--item <id>` for a subagent handoff and `--json` for structured output. The brief identifies the active phase, pending gates, focus work item, deliverable contract, and minimum files to read.
 
-For unfinished work, `studio.py work checkpoint` stores only the latest progress summary, next action, blockers, author, and timestamp on the work item. Use it at pause and handoff boundaries; it is not an activity log.
+For unfinished work, `studio.py work checkpoint` stores only the latest progress summary, next action, blockers, author, and timestamp on the work item. Use it at pause and handoff boundaries; it is not an activity log:
+
+```text
+python3 scripts/studio.py work checkpoint <project-root> <item-id> --summary "..." --next "..." --blocker "..." --by "Codex"
+```
 
 Use `studio.py repair <project-root>` only to refresh the managed AGENTS.md block and generated STATUS.md after a plugin policy update. It refuses to hide unrelated state corruption.
 
