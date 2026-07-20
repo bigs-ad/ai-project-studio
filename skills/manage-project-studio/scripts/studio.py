@@ -21,6 +21,7 @@ from typing import Any
 
 SCHEMA_VERSION = 1
 DELIVERABLE_CONTRACT_VERSION = 1
+PRODUCER_ACTOR = "AI Producer"
 STUDIO_DIR = "studio"
 ASSET_DIR = Path(__file__).resolve().parent.parent / "assets"
 PROFILE_DIR = ASSET_DIR / "profiles"
@@ -70,8 +71,8 @@ AGENTS_BLOCK = f"""{MANAGED_START}
 ## AI Project Studio
 
 - 回答问题时只回答；项目判断或行动前先加载已安装的 `manage-project-studio` Skill，并使用该 Skill 的 `scripts/studio.py` 运行 `validate` 和 `brief`，项目事实以仓库为准。
-- 用户确认产品方向、目标用户、成功标准、审美、范围、成本和发布；AI 负责已批准范围内低风险、可逆的技术与执行决策，重要不明确点只问一个关键问题。
-- 只实现当前 Phase Run 中状态为 approved 或 in_progress 且规格哈希有效的工作项；Subagent 不得批准、推进阶段或修改 Studio 状态。
+- 用户确认产品方向、目标用户、成功标准、审美、产品范围、成本风险、发布、阶段推进和可见成果验收；AI 制作人负责边界内的需求、规格、技术设计、依赖、任务安排、派工、文档、实现、审查、测试和低风险返工。
+- 工作项代表一个可观察项目结果，普通技术步骤不单独建项；明确需求或已确认里程碑可由制作人落规格并批准，之后连续推进到用户决策、可见成果验收或真实阻塞。Subagent 不得批准、推进阶段或修改 Studio 状态。
 - 收到负面反馈先诊断再同意或返工；验证成果后只推荐一个下一步，不因单次失败新增流程、文档、角色或检查表。
 {MANAGED_END}
 """
@@ -741,6 +742,7 @@ def validate_target(target: Path) -> tuple[list[str], list[str]]:
     if not isinstance(project_info.get("name"), str) or not project_info.get("name", "").strip():
         errors.append("project.json is missing a valid project.name")
     owner = project_info.get("owner")
+    owner_set_at: str | None = None
     if owner is None:
         warnings.append("Legacy project has no enforced user owner")
     elif not require_optional_text(owner):
@@ -850,9 +852,20 @@ def validate_target(target: Path) -> tuple[list[str], list[str]]:
                 errors.append("lifecycle.next_run_id would reuse an existing id")
 
         history = project.get("history")
+        owner_set_at = None
         if not isinstance(history, list) or not history:
             errors.append("project.json history must be a non-empty array")
         else:
+            owner_set_at = next(
+                (
+                    event.get("at")
+                    for event in history
+                    if isinstance(event, dict)
+                    and event.get("type") == "owner_set"
+                    and require_optional_text(event.get("at"))
+                ),
+                None,
+            )
             for index, event in enumerate(history):
                 if not isinstance(event, dict):
                     errors.append(f"Project history entry {index} must be an object")
@@ -1125,10 +1138,31 @@ def validate_target(target: Path) -> tuple[list[str], list[str]]:
                     errors.append(f"Work item {item_id} approval has no approver")
                 if destination == "approved" and not require_optional_text(event.get("spec_sha256")):
                     errors.append(f"Work item {item_id} approval has no spec hash")
+                if destination == "approved" and require_optional_text(owner):
+                    event_at = event.get("at")
+                    predates_owner_policy = (
+                        require_optional_text(owner_set_at)
+                        and require_optional_text(event_at)
+                        and event_at <= owner_set_at
+                    )
+                    if not predates_owner_policy:
+                        if event.get("by") not in {owner, PRODUCER_ACTOR}:
+                            errors.append(
+                                f"Work item {item_id} approval actor must be owner "
+                                f"{owner} or {PRODUCER_ACTOR}"
+                            )
+                        elif (
+                            event.get("by") == PRODUCER_ACTOR
+                            and not require_optional_text(event.get("reason"))
+                        ):
+                            errors.append(
+                                f"Work item {item_id} producer approval has no "
+                                "confirmed-boundary basis"
+                            )
                 if destination in {"review", "done"} and not require_optional_text(event.get("evidence")):
                     errors.append(f"Work item {item_id} transition to {destination} has no evidence")
                 if (
-                    destination in {"approved", "done"}
+                    destination == "done"
                     and require_optional_text(owner)
                     and event.get("by") != owner
                 ):
@@ -1617,11 +1651,11 @@ def build_brief_data(
         "required_reads": required_reads,
         "profile_reference": f"references/{profile['id']}.md",
         "operating_boundaries": [
-            "Ask before product, scope, risk, cost, release, or irreversible decisions.",
-            "Implement only approved or in_progress work with a current spec and contract.",
-            "Treat subagents as temporary executors; pass the project root and work item id.",
-            "Subagents must not approve work, advance phases, or mutate Studio state.",
-            "Verify with inspectable evidence before changing state or recommending the next step.",
+            "The owner decides product direction, taste, product scope, cost and risk boundaries, release, phase advancement, and user-visible acceptance.",
+            "Inside confirmed boundaries, the producer owns requirements, specs, technical design and dependencies, sequencing, delegation, documentation, implementation, review, testing, and low-risk corrections.",
+            "A work item is one observable project outcome, not a technical task; the producer may approve work that faithfully implements an explicit request or confirmed milestone.",
+            "Subagents are temporary executors and must not approve work, advance phases, or mutate Studio state.",
+            "Continue internal work until an owner decision, user-visible acceptance, or hard blocker; verify with inspectable evidence before changing state.",
         ],
     }
 
@@ -2359,8 +2393,6 @@ def command_work_move(args: argparse.Namespace) -> int:
                 + ", ".join(conflicting)
             )
     if destination == "approved":
-        if not args.approved_by:
-            raise StudioError("Moving to approved requires --approved-by")
         if not item.get("spec"):
             raise StudioError("Moving to approved requires an attached spec")
         approved_hash = hash_spec(target, item["spec"])
@@ -2375,12 +2407,22 @@ def command_work_move(args: argparse.Namespace) -> int:
     if args.evidence and evidence is None:
         evidence = require_text(args.evidence, "Evidence")
 
-    actor = (
-        require_user_actor(project, args.approved_by, "Work approver")
-        if destination in {"approved", "done"}
-        else require_text(args.by, "Transition actor")
-    )
+    if destination == "done":
+        actor = require_user_actor(project, args.approved_by, "Work acceptance actor")
+    elif destination == "approved":
+        actor = require_text(args.approved_by or args.by, "Work approver")
+    else:
+        actor = require_text(args.by, "Transition actor")
     reason = args.reason.strip() if args.reason and args.reason.strip() else None
+    owner = project.get("project", {}).get("owner")
+    if destination == "approved" and require_optional_text(owner):
+        if actor not in {owner, PRODUCER_ACTOR}:
+            raise StudioError(
+                f"Work approver must be the project owner '{owner}' or "
+                f"the canonical producer '{PRODUCER_ACTOR}'"
+            )
+        if actor == PRODUCER_ACTOR:
+            reason = require_text(args.reason, "Producer approval basis")
     if destination == "proposed" and source in {"approved", "in_progress", "review"}:
         reason = require_text(args.reason, "Scope change reason")
     if is_work_recovery:
@@ -2445,7 +2487,7 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("--name", required=True)
     init.add_argument("--owner", default="User")
     init.add_argument("--idea")
-    init.add_argument("--initialized-by", default="AI Producer")
+    init.add_argument("--initialized-by", default=PRODUCER_ACTOR)
     init.set_defaults(func=command_init)
 
     validate = commands.add_parser("validate", help="Validate Studio state")
@@ -2518,7 +2560,7 @@ def build_parser() -> argparse.ArgumentParser:
     work_add.add_argument("--kind", choices=["feature", "bug", "experiment", "chore"], required=True)
     work_add.add_argument("--summary", required=True)
     work_add.add_argument("--spec")
-    work_add.add_argument("--by", default="AI Producer")
+    work_add.add_argument("--by", default=PRODUCER_ACTOR)
     work_add.set_defaults(func=command_work_add)
     work_spec = work_commands.add_parser("attach-spec")
     work_spec.add_argument("target")
@@ -2533,13 +2575,13 @@ def build_parser() -> argparse.ArgumentParser:
     work_checkpoint.add_argument("--summary", required=True)
     work_checkpoint.add_argument("--next", dest="next_action", required=True)
     work_checkpoint.add_argument("--blocker", action="append")
-    work_checkpoint.add_argument("--by", default="AI Producer")
+    work_checkpoint.add_argument("--by", default=PRODUCER_ACTOR)
     work_checkpoint.set_defaults(func=command_work_checkpoint)
     work_move = work_commands.add_parser("move")
     work_move.add_argument("target")
     work_move.add_argument("item_id")
     work_move.add_argument("state", choices=sorted(VALID_WORK_STATES))
-    work_move.add_argument("--by", default="AI Producer")
+    work_move.add_argument("--by", default=PRODUCER_ACTOR)
     work_move.add_argument("--approved-by")
     work_move.add_argument("--reason")
     work_move.add_argument("--evidence")

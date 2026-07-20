@@ -24,14 +24,14 @@ Use these transitions:
 
 A rejected item may return to draft. Any unfinished item may be cancelled. Only approved work may enter in_progress. Review may return to in_progress.
 
-A work item is bounded when it has an outcome, non-goals, acceptance conditions, affected area, verification plan, and deliverable contract. The contract declares fidelity, purpose, limits, remaining production steps, evidence, and current unknowns. Prefer one vertical user or player outcome over separate frontend, backend, or infrastructure batches. Keep at most one item in progress or review at a time.
+A work item represents one observable project outcome, not a requirements, design, interface, state, file, test, review, or delegation task. It is bounded when it has an outcome, non-goals, acceptance conditions, affected area, verification plan, and deliverable contract. The contract declares fidelity, purpose, limits, remaining production steps, evidence, and current unknowns. Prefer one vertical user or player outcome over separate frontend, backend, or infrastructure batches; use a standalone technical item only for a material project risk or operability outcome. Keep at most one item in progress or review at a time.
 
-The recorded project owner approves proposed work and accepts review work as done. Producers and subagents may supply implementation and review evidence but may not impersonate user approval. Store a checkpoint before pausing unfinished work so a later thread can recover progress without replaying chat history.
+The producer may approve proposed work that faithfully implements an explicit user request or confirmed product milestone, recording that authorization basis in the transition reason. The recorded project owner accepts review work as done; producers and subagents may supply implementation and review evidence but may not impersonate user acceptance. Store a checkpoint before pausing unfinished work so a later thread can recover progress without replaying chat history.
 
 ## Change requests
 
-Stop implementation when new work changes an accepted requirement, an explicit non-goal, architecture, external cost, data or permission behavior, release risk, or the promised outcome. Present the smallest revised option and wait for confirmation. Do not silently enlarge the item.
-When an unfinished approved spec changes, move its work item back to proposed, record the reason, and obtain a new approval. The CLI binds approval to the spec SHA-256. A done item remains terminal; changed follow-up scope becomes a new work item, while mismatch with its historical approval is reported as a warning.
+Stop implementation when new work changes an accepted product requirement, explicit non-goal, external cost, data or permission behavior, irreversible or release risk, or the promised outcome. Present the smallest revised option and wait for confirmation. Ordinary technical design or dependency changes remain producer decisions unless they cross one of those boundaries. Do not silently enlarge the item.
+When an unfinished approved spec changes, move its work item back to proposed and record the reason. The producer may reapprove a technical change inside the confirmed product boundary; a product-boundary change requires user confirmation. The CLI binds approval to the spec SHA-256. A done item remains terminal; changed follow-up scope becomes a new work item, while mismatch with its historical approval is reported as a warning.
 
 ## Evidence
 

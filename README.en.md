@@ -14,7 +14,7 @@ It keeps project truth in the repository, limits implementation to approved work
 - Bounded work items with approval-bound specifications
 - Explicit deliverable levels from placeholder through final in-context output
 - Compact recovery briefs and pause checkpoints
-- User-owned approval and final acceptance records
+- Producer autonomy inside confirmed product boundaries, with user-owned direction, release, and final acceptance
 - Deterministic validation and lifecycle commands
 
 The workflow intentionally avoids permanent fictional teams, exhaustive checklists, and automatic process expansion.

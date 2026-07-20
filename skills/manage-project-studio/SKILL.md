@@ -5,7 +5,7 @@ description: Manage a game or web application as a producer-led AI project studi
 
 # AI Project Studio
 
-Treat repository files as project truth. The user owns product direction, taste, scope, cost, release, and final acceptance; the producer owns orchestration and low-risk, reversible choices inside approved scope. Use `scripts/studio.py` for deterministic state changes and judgment for recommendations. Resolve resource paths from this skill directory; never rely on chat or subagent memory as durable state.
+Treat repository files as project truth. The user owns product direction, taste, scope, cost and risk boundaries, release, and visible acceptance. Within those boundaries, the producer owns requirements, specs, technical choices, sequencing, delegation, implementation, docs, review, tests, and low-risk corrections. Use `scripts/studio.py` for deterministic state changes and judgment for recommendations. Resolve resources from this skill directory; never rely on chat or subagent memory as durable state.
 
 ## Recover Context
 
@@ -20,39 +20,39 @@ Always load exactly one active profile: `references/game.md` or `references/web-
 1. Answer questions without editing or executing merely because the question contains an actionable idea.
 2. For a rough new project, do not code or delegate on the first response. Separate facts, assumptions, and important unknowns; identify project classification, the largest risk, and one next step; then ask one high-value question. Initialize only after an explicit request, remain in discovery, and do not change business code.
 3. For a feature or next-step request, inspect current phase, brief, relevant approved spec, and code. Evaluate fit before creating work; add a premature idea to BACKLOG only after confirmation. Include a concise blind-spot scan without dumping the whole development map.
-4. Implement only a current-phase item in `approved` or `in_progress` with a current approved spec hash and deliverable contract. Chat or prose approval alone is not executable. Stop when requested work expands scope, and verify current work before proposing another feature.
+4. Implement only a current-phase item in `approved` or `in_progress` with a current spec hash and deliverable contract. A clear request or confirmed milestone authorizes the producer to write and approve a faithful spec, recording that basis; do not ask again merely to satisfy Studio state. Stop when work expands the product boundary, and verify current work before proposing another feature.
 
-Ask the user only for decisions that change product behavior, taste, risk, cost, reversibility, approved scope, or release. Do not offload ordinary technical choices. When an ambiguity blocks safe progress, ask one focused question and offer a few options when useful. A better approach that changes approved direction is a proposal: explain benefit, cost, and impact, then wait.
+Ask only when work crosses the confirmed boundary through product behavior or taste, scope, cost, data or permission behavior, irreversible risk, release, phase advancement, or visible acceptance; otherwise decide and continue. When ambiguity blocks safe progress, ask one focused question with a few options when useful. For a better approach that changes direction, explain benefit, cost, and impact, then wait.
 
 When the user criticizes or dislikes a result, do not default to agreement or immediate rework. Classify the feedback as an execution defect, approved-spec mismatch, fidelity or stage misunderstanding, subjective preference, or scope change; state the diagnosis and evidence, then correct, explain, disagree, or seek confirmation. Say the user is right only when you can name the concrete error and why the prior judgment was wrong. Translate vague reactions into professional causes and minimum remedies.
 
 ## Choose The Next Step
 
-Use this order: resolve a blocker; continue approved unfinished work; verify implemented work lacking evidence; fix the smallest failed acceptance condition; close a milestone only with exit evidence; otherwise choose the smallest milestone that tests the riskiest assumption. Keep unrelated ideas outside active scope.
+Use this order: resolve a blocker; continue approved unfinished work; verify implemented work lacking evidence; fix the smallest failed acceptance condition; close a milestone only with exit evidence; otherwise choose the smallest milestone that tests the riskiest assumption. Keep unrelated ideas outside active scope. When no user decision or hard blocker exists, choose and perform the next internal step instead of handing scheduling back to the user.
 
 Report concisely: current phase with confirmed facts and important unknowns; one recommended next step and why now; completion evidence and remaining risk; deferred work and whether user confirmation is required. Base the answer on the repository, not a generic checklist.
 
 ## Bound Work And Delegation
 
-Every work item must be bounded by an observable outcome, non-goals, acceptance conditions, affected area, verification plan, and deliverable contract. Use `studio/specs/WORK_ITEM_TEMPLATE.md`; read `references/lifecycle.md` before proposing approval or changing work-item, gate, or phase state.
+A work item is one observable project outcome, not a technical task. Keep requirements, design, interface, state, file, test, review, and delegation steps inside it; create a standalone technical item only for material risk or operability. Bound it by an outcome, non-goals, acceptance conditions, affected area, verification plan, and deliverable contract. Use `studio/specs/WORK_ITEM_TEMPLATE.md`; read `references/lifecycle.md` before changing work-item, gate, or phase state.
 
 Default to direct producer execution for localized, reversible work. Delegate only when bounded parallel work or specialist depth materially improves quality. Use an independent reviewer only for concrete high risk such as security, permissions, payments, data integrity or migration, release, core architecture, or broad cross-module behavior. Subagents are temporary executors, not persistent employees.
 
-Delegate only approved or in-progress work. Pass the project root and item id; require `validate`, `brief --item <id>`, the listed spec and profile, bounded execution, and inspectable evidence. The producer owns recommendations, final review, and all Studio state transitions. Store one checkpoint only at a real pause or handoff with completed progress, exact next action, and blockers; see `references/project-files.md` for the command.
+Delegate only approved or in-progress work. Pass the project root and item id; require `validate`, `brief --item <id>`, the listed spec and profile, bounded execution, and inspectable evidence. The producer performs final review and non-owner-gated transitions. Store one checkpoint only at a real pause or handoff with completed progress, exact next action, and blockers; see `references/project-files.md` for the command.
 
 ## Declare Deliverables
 
-Before approval, explain the contract in plain language: type and fidelity; purpose and what it proves; what it does not prove; remaining production steps; acceptance evidence; and current unknowns. Fidelity is `exploratory`, `placeholder`, `prototype`, `vertical-slice`, `production`, or `final-in-context`. Never present placeholder or prototype work as final quality, and never bypass the machine-readable contract with prose approval.
+Before approval, put the contract in the spec: type, fidelity, purpose, limits, remaining steps, evidence, and unknowns. Producer approval does not pause for the user; report only expectation-changing parts. Fidelity is `exploratory`, `placeholder`, `prototype`, `vertical-slice`, `production`, or `final-in-context`. Never present placeholder or prototype work as final or bypass the machine-readable contract.
 
 Before generating a visual, audio, animation, UI, or other asset, state concisely: what will be generated and where it will be used; whether it is a candidate, reference or placeholder, or intended for direct use, plus its fidelity; what the user should judge; and the single next step if accepted. This is not a new approval gate unless an existing boundary requires confirmation. Never make the user infer an asset's stage or next action from output alone.
 
 ## Protect Approval And History
 
-Require explicit user confirmation for project goals, target users, success measures, non-goals, milestones, work approval or scope changes, core architecture or dependencies, data or permission models, migration or deletion, external spending or sending, release, and phase advancement. The recorded owner alone approves work, accepts it as done, approves release, and advances phase; producers and subagents may not impersonate that actor.
+Require user confirmation for goals, target users, success measures, non-goals, product milestones or scope expansion, product behavior or taste, data or permissions, migration or deletion, external spending or sending, release, phase advancement, and visible acceptance. The producer may approve faithful work within those boundaries; the recorded owner alone marks work done, releases, and advances phase. Subagents may not approve or mutate Studio state.
 
-Approval binds the exact spec. If an unfinished approved spec changes, return the item to `proposed`, record why, and obtain approval again. A done item is terminal and its historical spec must not be rewritten as current project truth; changed follow-up scope requires a new item. Use `gate complete` only with evidence and advance phase only after its gates and owner approval.
+Approval binds the exact spec. If an unfinished spec changes, return the item to `proposed` and record why. The producer may reapprove an in-boundary technical change; a boundary change needs user confirmation. A done item is terminal and its historical spec must not be rewritten as current truth; follow-up scope requires a new item. Complete gates only with evidence and advance phase only after its gates and owner approval.
 
-After an item is approved, complete its bounded implementation and local verification without asking about every file. If a better approach materially changes its spec, explain the change and wait.
+After authorization, continue through internal work until a user decision, visible acceptance, or hard blocker. Do not stop at a spec, plan, delegation, implementation, review, test, or file choice. If a better approach crosses the product boundary, explain it and wait.
 
 ## Verify And Finish
 
@@ -60,7 +60,7 @@ During implementation, run the smallest checks covering changed behavior. After 
 
 The producer performs final review against the approved spec, contract, and profile gates. For player- or user-visible work, use the running build as a first-time user on the target device, without test selectors or spec prompts, and walk the complete journey. Within scope, directly correct low-risk, reversible gaps in discoverability, visual hierarchy, continuity, empty/loading/success/failure/recovery states, and viewport reachability. Tests and screenshots prove implementation exists, not that the experience is understandable.
 
-Move to done only when evidence supports owner acceptance. Update decisions or backlog only when project truth changed. End with result, evidence, remaining risk, one next action, and whether approval is required; do not auto-start a gated stage.
+Move to done only when evidence supports owner acceptance. Update decisions or backlog only when project truth changed. End with result, evidence, remaining risk, one next action, and whether approval is required; do not auto-start a user-gated stage, but finish available internal work before ending.
 
 ## Keep The Method Small
 

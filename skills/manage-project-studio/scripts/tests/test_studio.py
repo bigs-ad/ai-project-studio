@@ -66,6 +66,23 @@ class StudioContractTests(unittest.TestCase):
             "work", "move", str(self.project), item_id, state, *extra, ok=ok
         )
 
+    def complete_current_gates(self, *, skip: set[str] | None = None) -> None:
+        skipped = skip or set()
+        listed = self.run_cli("gate", "list", str(self.project))
+        for line in listed.stdout.splitlines():
+            gate_id, status, _ = line.split("\t", 2)
+            if status == "pending" and gate_id not in skipped:
+                self.run_cli(
+                    "gate",
+                    "complete",
+                    str(self.project),
+                    gate_id,
+                    "--evidence",
+                    f"verified {gate_id}",
+                    "--by",
+                    "Codex",
+                )
+
     def test_valid_contract_supports_full_work_lifecycle(self) -> None:
         item_id = self.add_item("Playable slice")
         self.move(item_id, "proposed", "--by", "Codex")
@@ -123,21 +140,42 @@ class StudioContractTests(unittest.TestCase):
 
     def test_initial_idea_and_owner_are_persisted(self) -> None:
         project_text = (self.project / "studio/PROJECT.md").read_text(encoding="utf-8")
+        agents_text = (self.project / "AGENTS.md").read_text(encoding="utf-8")
         project_state = json.loads(
             (self.project / "studio/project.json").read_text(encoding="utf-8")
         )
         self.assertIn("A card-driven creative generator", project_text)
         self.assertIn("不是已经批准的项目目标", project_text)
+        self.assertIn("AI 制作人负责边界内的需求", agents_text)
+        self.assertIn("普通技术步骤不单独建项", agents_text)
+        self.assertIn("发布、阶段推进和可见成果验收", agents_text)
         self.assertEqual(project_state["project"]["owner"], "Jiang")
 
-    def test_owner_must_approve_and_accept_work(self) -> None:
-        item_id = self.add_item("Owner-controlled slice")
+    def test_producer_may_approve_but_owner_must_accept_work(self) -> None:
+        item_id = self.add_item("Producer-approved slice")
         self.move(item_id, "proposed", "--by", "Codex")
+        rejected = self.move(item_id, "approved", ok=False)
+        self.assertIn("Producer approval basis", rejected.stderr)
         rejected = self.move(
-            item_id, "approved", "--approved-by", "Codex", ok=False
+            item_id,
+            "approved",
+            "--by",
+            "Review Subagent",
+            "--reason",
+            "Claimed confirmed boundary",
+            ok=False,
         )
-        self.assertIn("must match the project owner", rejected.stderr)
-        self.move(item_id, "approved", "--approved-by", "Jiang")
+        self.assertIn("canonical producer", rejected.stderr)
+        self.move(
+            item_id,
+            "approved",
+            "--reason",
+            "Explicit user request inside the confirmed product boundary",
+        )
+        work_state = json.loads(
+            (self.project / "studio/work-items.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(work_state["items"][0]["approved_by"], "AI Producer")
         self.move(item_id, "in_progress", "--by", "Codex")
         self.move(
             item_id,
@@ -157,6 +195,99 @@ class StudioContractTests(unittest.TestCase):
             ok=False,
         )
         self.assertIn("must match the project owner", rejected.stderr)
+        self.move(
+            item_id,
+            "done",
+            "--approved-by",
+            "Jiang",
+            "--evidence",
+            "owner accepted playable result",
+        )
+        self.run_cli("validate", str(self.project))
+
+    def test_validation_rejects_producer_approval_without_boundary_basis(self) -> None:
+        item_id = self.add_item("Audited producer approval")
+        self.move(item_id, "proposed", "--by", "Codex")
+        self.move(
+            item_id,
+            "approved",
+            "--reason",
+            "Confirmed milestone",
+        )
+        work_path = self.project / "studio/work-items.json"
+        work_state = json.loads(work_path.read_text(encoding="utf-8"))
+        approval = next(
+            event
+            for event in work_state["items"][0]["history"]
+            if event.get("to") == "approved"
+        )
+        approval["reason"] = None
+        work_path.write_text(
+            json.dumps(work_state, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        rejected = self.run_cli("validate", str(self.project), ok=False)
+        self.assertIn(
+            "producer approval has no confirmed-boundary basis", rejected.stdout
+        )
+
+    def test_release_and_phase_advancement_require_owner(self) -> None:
+        for _ in range(3):
+            self.complete_current_gates()
+            self.run_cli(
+                "phase",
+                "advance",
+                str(self.project),
+                "--approved-by",
+                "Jiang",
+                "--reason",
+                "Owner accepted the phase outcome",
+            )
+
+        self.complete_current_gates(skip={"release-approval"})
+        rejected = self.run_cli(
+            "gate",
+            "complete",
+            str(self.project),
+            "release-approval",
+            "--evidence",
+            "producer attempted release",
+            "--by",
+            "Codex",
+            ok=False,
+        )
+        self.assertIn("must match the project owner", rejected.stderr)
+        self.run_cli(
+            "gate",
+            "complete",
+            str(self.project),
+            "release-approval",
+            "--evidence",
+            "owner approved release",
+            "--by",
+            "Jiang",
+        )
+        rejected = self.run_cli(
+            "phase",
+            "advance",
+            str(self.project),
+            "--approved-by",
+            "Codex",
+            "--reason",
+            "producer attempted phase advancement",
+            ok=False,
+        )
+        self.assertIn("must match the project owner", rejected.stderr)
+        self.run_cli(
+            "phase",
+            "advance",
+            str(self.project),
+            "--approved-by",
+            "Jiang",
+            "--reason",
+            "Owner approved operating the release",
+        )
+        self.run_cli("validate", str(self.project))
 
     def test_brief_exposes_execution_boundary_and_ambiguity(self) -> None:
         first = self.add_item("First proposal")
@@ -174,6 +305,11 @@ class StudioContractTests(unittest.TestCase):
         self.assertIn(
             proposed_data["focus_item"]["spec"], proposed_data["required_reads"]
         )
+        boundaries = proposed_data["operating_boundaries"]
+        self.assertTrue(
+            any("producer owns requirements" in rule for rule in boundaries)
+        )
+        self.assertTrue(any("not a technical task" in rule for rule in boundaries))
 
         self.move(first, "approved", "--approved-by", "Jiang")
         second = self.add_item("Second proposal")
@@ -247,6 +383,9 @@ class StudioContractTests(unittest.TestCase):
         )
         warning = self.run_cli("validate", str(self.project))
         self.assertIn("Legacy project has no enforced user owner", warning.stdout)
+        item_id = self.add_item("Legacy approved slice")
+        self.move(item_id, "proposed", "--by", "Legacy Agent")
+        self.move(item_id, "approved", "--by", "Legacy Agent")
         self.run_cli(
             "project", "set-owner", str(self.project), "--owner", "Legacy Owner"
         )
